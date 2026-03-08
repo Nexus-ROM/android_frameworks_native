@@ -3316,6 +3316,10 @@ ui::Rotation SurfaceFlinger::getPhysicalDisplayOrientation(PhysicalDisplayId dis
         }
     }
 
+    const bool isInternalDisplay = mPhysicalDisplays.get(displayId)
+                                           .transform(&PhysicalDisplay::isInternal)
+                                           .value_or(false);
+
     if (isPrimary) {
         using Values = SurfaceFlingerProperties::primary_display_orientation_values;
         switch (primary_display_orientation(Values::ORIENTATION_0)) {
@@ -3328,7 +3332,20 @@ ui::Rotation SurfaceFlinger::getPhysicalDisplayOrientation(PhysicalDisplayId dis
             default:
                 break;
         }
+    } else if (isInternalDisplay) {
+        using Values = SurfaceFlingerProperties::secondary_display_orientation_values;
+        switch (secondary_display_orientation(Values::ORIENTATION_0)) {
+            case Values::ORIENTATION_90:
+                return ui::ROTATION_90;
+            case Values::ORIENTATION_180:
+                return ui::ROTATION_180;
+            case Values::ORIENTATION_270:
+                return ui::ROTATION_270;
+            default:
+                break;
+        }
     }
+
     return ui::ROTATION_0;
 }
 
